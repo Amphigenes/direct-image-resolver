@@ -49,6 +49,34 @@ if (url.includes('imagevenue.com')) {
         .catch(() => {
             document.documentElement.style.display = '';
         });
+    
+// ================= ImageBam =================
+} else if (url.includes('imagebam.com')) {
+
+    const tryRedirect = () => {
+        const img =
+            document.querySelector('img#main-image') ||
+            document.querySelector('img.main-image') ||
+            document.querySelector('img[src*="imagebam"]');
+
+        if (img?.src) {
+            location.replace(img.src);
+            return true;
+        }
+        return false;
+    };
+
+    if (!tryRedirect()) {
+        const observer = new MutationObserver(() => {
+            if (tryRedirect()) observer.disconnect();
+        });
+
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true
+        });
+    }
+}
 
 // ================= Pixhost =================
 } else if (url.includes('pixhost.to')) {
