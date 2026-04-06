@@ -3,22 +3,44 @@ const url = location.href;
 // ================= ImageVenue =================
 if (url.includes('imagevenue.com')) {
 
+    const isValidImage = (src) => {
+        if (!src) return false;
+
+        return (
+            // dominio correcto
+            (
+                src.includes('cdno-data.imagevenue.com') ||
+                src.match(/img\d+\.imagevenue\.com/)
+            )
+            &&
+            // extensión válida
+            (src.endsWith('.jpg') || src.endsWith('.jpeg') || src.endsWith('.png'))
+        );
+    };
+
     const tryRedirect = () => {
-        const img = document.querySelector('img#main-image');
-        if (img && img.src) {
+        // 1. prioridad: main-image
+        const main = document.querySelector('#main-image');
+        if (isValidImage(main?.src)) {
+            location.replace(main.src);
+            return true;
+        }
+
+        // 2. fallback: buscar en todas
+        const img = [...document.images]
+            .find(i => isValidImage(i.src));
+
+        if (img) {
             location.replace(img.src);
             return true;
         }
+
         return false;
     };
 
-    // intento inmediato
     if (!tryRedirect()) {
-        // observar el DOM hasta que aparezca la imagen
         const observer = new MutationObserver(() => {
-            if (tryRedirect()) {
-                observer.disconnect();
-            }
+            if (tryRedirect()) observer.disconnect();
         });
 
         observer.observe(document.documentElement, {
@@ -26,7 +48,6 @@ if (url.includes('imagevenue.com')) {
             subtree: true
         });
     }
-
 // ================= ImageTwist =================
 } else if (url.includes('imagetwist.com')) {
 
@@ -54,12 +75,9 @@ if (url.includes('imagevenue.com')) {
 } else if (url.includes('imagebam.com')) {
 
     const tryRedirect = () => {
-        const img =
-            document.querySelector('img#main-image') ||
-            document.querySelector('img.main-image') ||
-            document.querySelector('img[src*="imagebam"]');
+        const img = document.querySelector('img.main-image');
 
-        if (img?.src) {
+        if (img?.src && !img.src.includes('loader')) {
             location.replace(img.src);
             return true;
         }
@@ -76,7 +94,7 @@ if (url.includes('imagevenue.com')) {
             subtree: true
         });
     }
-}
+
 
 // ================= Pixhost =================
 } else if (url.includes('pixhost.to')) {
